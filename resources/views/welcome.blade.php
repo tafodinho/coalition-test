@@ -4,13 +4,16 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title>Laravel</title>
 
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com/css?family=Raleway:100,600" rel="stylesheet" type="text/css">
-
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
         <!-- Styles -->
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
         <style>
             html, body {
                 background-color: #fff;
@@ -29,6 +32,7 @@
                 align-items: center;
                 display: flex;
                 justify-content: center;
+                margin-top: 100px;
             }
 
             .position-ref {
@@ -65,31 +69,81 @@
         </style>
     </head>
     <body>
-        <div class="flex-center position-ref full-height">
-            @if (Route::has('login'))
-                <div class="top-right links">
-                    @auth
-                        <a href="{{ url('/home') }}">Home</a>
-                    @else
-                        <a href="{{ route('login') }}">Login</a>
-                        <a href="{{ route('register') }}">Register</a>
-                    @endauth
-                </div>
-            @endif
+        <div class="container">
+            <form action="{{route('store')}}" method="post">
+                {{ csrf_token() }}
+              <div class="form-group">
+                <label for="exampleInputEmail1">Product Name</label>
+                <input type="text" name="product_name" class="form-control" id="productName" placeholder="Enter product name">
+              </div>
+              <div class="form-group">
+                <label for="exampleInputPassword1">Quantity in stock</label>
+                <input type="number" name="quantity" class="form-control" id="quantity" placeholder="Enter Quantity in stock">
+              </div>
+              <div class="form-group">
+                <label for="exampleInputEmail1">Price</label>
+                <input type="text" name="price" class="form-control" id="price" placeholder="Enter Price">
+              </div>
 
-            <div class="content">
-                <div class="title m-b-md">
-                    Laravel
-                </div>
-
-                <div class="links">
-                    <a href="https://laravel.com/docs">Documentation</a>
-                    <a href="https://laracasts.com">Laracasts</a>
-                    <a href="https://laravel-news.com">News</a>
-                    <a href="https://forge.laravel.com">Forge</a>
-                    <a href="https://github.com/laravel/laravel">GitHub</a>
-                </div>
-            </div>
+              <button class="btn btn-primary">Submit</button>
+            </form>
         </div>
+
+        <div class="container flex-center">
+            <table class="table table-dark">
+              <thead>
+                <tr>
+                  <th scope="col">Product Name</th>
+                  <th scope="col">Quantity in stock</th>
+                  <th scope="col">Price</th>
+                  <th scope="col">Date and Time created</th>
+                  <th scope="col">Total Value Number</th>
+                </tr>
+              </thead>
+              <tbody id="table-body">
+                @foreach ($products as $product)
+                    <tr>
+                      <td>{{$product->product_name}}</td>
+                      <td>{{$product->quantity_in_stock}}</td>
+                      <td>{{$product->price}}</td>
+                      <td>{{$product->created_at}}</td>
+                      <td>{{$product->quantity_in_stock * $product->price}}</td>
+                    </tr>
+                @endforeach
+                <div id="man"></div>
+              </tbody>
+            </table>
+        </div>
+
+        <script type="text/javascript">
+            $(document).ready(function() {
+                // 2) Listen for the submission of the form.
+                //console.log("formData");
+                $("form").submit(function(event) {
+
+                    // 3) Prevent an entire page load (or reload).
+                    event.preventDefault();
+
+                    // 4) Grab the information from the form needed for the Ajax request.
+                    var formAction = $(this).attr('action'); // e.g. '/somethings'
+                    var formMethod = $(this).attr('method'); // e.g. 'post'
+                    var formData   = $(this).serializeArray() // grabs the form data and makes your params nicely structured!
+                    console.log(formData);
+                    $("#table-body").append("<tr><td>"+formData[0].value+"</td><td>"+formData[1].value+"</td><td>"+formData[2]value+"</td><td></td><td>"+formData[2].value * formData[1].value+"</td></tr>");
+                    // 5) Make the Ajax request, which will hit the 'create' action in the 'somethings' controller
+                    $.ajax({
+                      url:  formAction,
+                      type: formMethod,
+                      data: formData,
+                      headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                      }
+                  }).done(function(response){
+                      $("#man").load("<div>akjsdfkasf</div>")
+                  });
+                });
+            });
+        </script>
+
     </body>
 </html>
